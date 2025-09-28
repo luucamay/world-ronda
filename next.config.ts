@@ -4,7 +4,14 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['static.usernames.app-backend.toolsforhumanity.com'],
   },
-  allowedDevOrigins: ['*'], // Allow all origins in development
+  allowedDevOrigins: [
+    '*', // Allow all origins in development
+    'https://orally-uncitable-burton.ngrok-free.dev',
+    'https://*.ngrok-free.dev',
+    'https://*.ngrok.io',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
   reactStrictMode: false,
   // Allow eval in development mode for Next.js hot reloading
   ...(process.env.NODE_ENV === 'development' && {
@@ -22,11 +29,19 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
+            value: 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
+            value: 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, X-Forwarded-Host, X-Forwarded-Proto, ngrok-skip-browser-warning',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
           },
         ],
       },
