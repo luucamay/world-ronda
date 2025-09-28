@@ -93,7 +93,7 @@ function PublicRoundCard({
       const requestBody = { roundId };
       console.log('🔵 [FRONTEND] Request body:', requestBody);
       
-      const response = await fetch('/api/join-round', {
+      const response = await fetch('/api/rounds', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
 export async function POST(request: NextRequest) {
-  console.log('🔵 [API] POST /api/join-round - Request received');
+  console.log('🔵 [API] POST /api/rounds - Join round request received');
+  console.log('🔵 [API] Simulating PasaCoin API call: joinPublicRound(userId, roundId)');
   try {
     console.log('🔵 [API] Checking user authentication...');
     const session = await auth();
@@ -32,18 +33,36 @@ export async function POST(request: NextRequest) {
     console.log('🔵 [API] Processing join request (simulating 1s delay)...');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Here you would implement the actual logic to join a round
-    // For now, we'll just return a success response
+    // Simulate PasaCoin API response structure
+    // This simulates the actual API call: apiService.joinPublicRound(userId, roundId)
     console.log(`✅ [API] User ${session.user.id} successfully joined round ${roundId}`);
+    console.log('🔵 [API] Simulating PasaCoin API response structure...');
 
-    const response = {
-      success: true,
-      message: 'Successfully joined the round',
-      roundId,
-      userId: session.user.id
+    // Mock response matching CreateRoundResponse interface from PasaCoin API
+    const pasaCoinResponse = {
+      code: 200,
+      message: 'User successfully joined the public round',
+      success: true
     };
     
-    console.log('🔵 [API] Sending response:', response);
+    // Add additional metadata for frontend use
+    const response = {
+      ...pasaCoinResponse,
+      roundId,
+      userId: session.user.id,
+      timestamp: new Date().toISOString(),
+      // Simulate additional round info that might be returned
+      roundInfo: {
+        id: parseInt(roundId) || 1,
+        name: `Round ${roundId}`,
+        numberOfParticipants: Math.floor(Math.random() * 50) + 1,
+        numberActualOfParticipants: Math.floor(Math.random() * 45) + 1,
+        payOfRounds: 100,
+        status: 'ACTIVE'
+      }
+    };
+    
+    console.log('🔵 [API] Sending PasaCoin-compatible response:', response);
     return NextResponse.json(response);
 
   } catch (error) {
