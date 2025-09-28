@@ -46,6 +46,11 @@ function PublicRoundCard({
   isUserJoined = false
 }: Props) {
   const [isJoining, setIsJoining] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showAlreadyJoinedModal, setShowAlreadyJoinedModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [hasJoined, setHasJoined] = useState(isUserJoined);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -54,12 +59,14 @@ function PublicRoundCard({
 
   const handleJoinRound = async () => {
     if (!roundId) {
-      alert('Round ID not available');
+      setErrorMessage('Round ID not available');
+      setShowErrorModal(true);
       return;
     }
 
     if (!session?.user) {
-      alert('User not authenticated. Please login again.');
+      setErrorMessage('User not authenticated. Please login again.');
+      setShowErrorModal(true);
       return;
     }
 
@@ -84,14 +91,13 @@ function PublicRoundCard({
       console.log('✅ API response:', result);
       
       console.log('✅ Successfully joined round');
-      alert('You have successfully joined the round!');
-      
-      // Refresh the page to show updated state
-      window.location.reload();
+      setHasJoined(true);
+      setShowSuccessModal(true);
       
     } catch (error) {
       console.error('❌ Error joining round:', error);
-      alert('Failed to join the round. Please try again.');
+      setErrorMessage('Failed to join the round. Please try again.');
+      setShowErrorModal(true);
     } finally {
       setIsJoining(false);
     }
@@ -99,12 +105,7 @@ function PublicRoundCard({
 
   const handleCardPress = () => {
     if (isUserJoined) {
-      const shouldNavigate = confirm(
-        'You are already a member of this round. Would you like to view your rounds?'
-      );
-      if (shouldNavigate) {
-        router.push('/home');
-      }
+      setShowAlreadyJoinedModal(true);
       return;
     }
 
@@ -116,9 +117,9 @@ function PublicRoundCard({
     <div 
       className={`
         bg-gray-800 border rounded-2xl p-4 cursor-pointer transition-all duration-200
-        hover:bg-gray-750 hover:border-gray-600 hover:shadow-lg
+        active:scale-[0.98] active:bg-gray-750
         ${isAnimated 
-          ? 'border-purple-500/50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30' 
+          ? 'border-purple-500/50 shadow-lg shadow-purple-500/20' 
           : 'border-gray-700'
         }
       `}
@@ -169,12 +170,12 @@ function PublicRoundCard({
             size="sm"
             variant="primary"
             disabled={isJoining}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation(); // Prevent card click
               handleJoinRound();
             }}
             className={`
-              ${isAnimated ? 'shadow-lg shadow-purple-500/30 hover:shadow-purple-500/40' : ''}
+              ${isAnimated ? 'shadow-lg shadow-purple-500/30' : ''}
               ${isJoining ? 'opacity-60' : ''}
             `}
           >
@@ -192,6 +193,84 @@ function PublicRoundCard({
           </Button>
         )}
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-600 rounded-2xl p-6 max-w-sm w-full">
+            <div className="text-center">
+              <div className="text-4xl mb-4">🎉</div>
+              <h3 className="text-white font-bold text-lg mb-2">Success!</h3>
+              <p className="text-gray-300 mb-6">You have successfully joined the round!</p>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                }}
+                className="w-full"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-600 rounded-2xl p-6 max-w-sm w-full">
+            <div className="text-center">
+              <div className="text-4xl mb-4">❌</div>
+              <h3 className="text-white font-bold text-lg mb-2">Error</h3>
+              <p className="text-gray-300 mb-6">{errorMessage}</p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowErrorModal(false)}
+                className="w-full"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Already Joined Modal */}
+      {showAlreadyJoinedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-600 rounded-2xl p-6 max-w-sm w-full">
+            <div className="text-center">
+              <div className="text-4xl mb-4">ℹ️</div>
+              <h3 className="text-white font-bold text-lg mb-2">Already Joined</h3>
+              <p className="text-gray-300 mb-6">You are already a member of this round. Would you like to view your rounds?</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowAlreadyJoinedModal(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setShowAlreadyJoinedModal(false);
+                    router.push('/home');
+                  }}
+                  className="flex-1"
+                >
+                  View Rounds
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
