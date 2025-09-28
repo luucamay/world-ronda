@@ -167,7 +167,7 @@ function PublicRoundCard({
           </div>
         ) : (
           <Button
-            size="sm"
+            size={isAnimated ? "lg" : "sm"}
             variant="primary"
             disabled={isJoining}
             onClick={(e: React.MouseEvent) => {
@@ -175,7 +175,7 @@ function PublicRoundCard({
               handleJoinRound();
             }}
             className={`
-              ${isAnimated ? 'shadow-lg shadow-purple-500/30' : ''}
+              ${isAnimated ? 'shadow-2xl shadow-purple-500/50 ring-2 ring-purple-500/30 hover:shadow-purple-400/60 transform hover:scale-105 transition-all duration-300' : ''}
               ${isJoining ? 'opacity-60' : ''}
             `}
           >
