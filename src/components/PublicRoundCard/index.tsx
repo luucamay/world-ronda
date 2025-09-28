@@ -198,9 +198,9 @@ function PublicRoundCard({
             variant="primary"
             disabled={isJoining}
             onClick={(e: React.MouseEvent) => {
-              console.log('🔴 [FRONTEND] BUTTON CLICKED! Event triggered');
+              console.log('🔴 [FRONTEND] JOIN ROUND BUTTON CLICKED! Navigating to round details');
               e.stopPropagation(); // Prevent card click
-              handleJoinRound();
+              router.push(`/round-detail?id=${roundId}&name=${encodeURIComponent(name)}&nextAmount=${encodeURIComponent(nextAmount)}&dueText=${encodeURIComponent(dueText)}&members=${members}&totalMembers=${totalMembers}`);
             }}
             className={`
               ${isAnimated ? 'shadow-2xl shadow-purple-500/50 ring-2 ring-purple-500/30 hover:shadow-purple-400/60 transform hover:scale-105 transition-all duration-300' : ''}
