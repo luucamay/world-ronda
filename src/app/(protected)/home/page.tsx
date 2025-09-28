@@ -8,7 +8,13 @@ import { ViewPermissions } from '@/components/ViewPermissions';
 import { Marble, TopBar } from '@worldcoin/mini-apps-ui-kit-react';
 
 export default async function Home() {
+  const homePageStart = performance.now();
+  console.log('🏠 Home Page: Starting page render...');
+  
+  const sessionStart = performance.now();
   const session = await auth();
+  console.log(`🏠 Home Page: Session fetch completed in ${(performance.now() - sessionStart).toFixed(2)}ms`);
+  console.log(`🏠 Home Page: Total page render time: ${(performance.now() - homePageStart).toFixed(2)}ms`);
 
   return (
     <>

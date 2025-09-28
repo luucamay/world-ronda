@@ -13,14 +13,23 @@ import { getNewNonces } from './server-helpers';
  * @throws {Error} If wallet authentication fails at any step.
  */
 export const walletAuth = async () => {
+  const startTime = performance.now();
+  console.log('⏱️ walletAuth: Starting authentication process...');
+  
+  console.log('⏱️ walletAuth: Step 1 - Generating nonces...');
+  const nonceStart = performance.now();
   const { nonce, signedNonce } = await getNewNonces();
+  console.log(`⏱️ walletAuth: Step 1 completed in ${(performance.now() - nonceStart).toFixed(2)}ms`);
 
+  console.log('⏱️ walletAuth: Step 2 - Calling MiniKit wallet auth...');
+  const miniKitStart = performance.now();
   const result = await MiniKit.commandsAsync.walletAuth({
     nonce,
     expirationTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     notBefore: new Date(Date.now() - 24 * 60 * 60 * 1000),
     statement: `Authenticate (${crypto.randomUUID().replace(/-/g, '')}).`,
   });
+  console.log(`⏱️ walletAuth: Step 2 completed in ${(performance.now() - miniKitStart).toFixed(2)}ms`);
   console.log('Result', result);
   if (!result) {
     throw new Error('No response from wallet auth');
@@ -36,10 +45,16 @@ export const walletAuth = async () => {
     console.log(result.finalPayload);
   }
 
-  await signIn('credentials', {
+  console.log('⏱️ walletAuth: Step 3 - Calling NextAuth signIn...');
+  const signInStart = performance.now();
+  const signInResult = await signIn('credentials', {
     redirectTo: '/home',
     nonce,
     signedNonce,
     finalPayloadJson: JSON.stringify(result.finalPayload),
   });
+  console.log(`⏱️ walletAuth: Step 3 completed in ${(performance.now() - signInStart).toFixed(2)}ms`);
+  console.log(`⏱️ walletAuth: Total authentication time: ${(performance.now() - startTime).toFixed(2)}ms`);
+  
+  return signInResult;
 };
