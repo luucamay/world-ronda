@@ -2,7 +2,8 @@
 
 import { TabItem, Tabs } from '@worldcoin/mini-apps-ui-kit-react';
 import { CircleSpark, Home, User } from 'iconoir-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 /**
  * This component uses the UI Kit to navigate between pages
@@ -12,12 +13,46 @@ import { useState } from 'react';
  */
 
 export const Navigation = () => {
+  const router = useRouter();
+  const pathname = usePathname();
   const [value, setValue] = useState('home');
 
+  // Update active tab based on current pathname
+  useEffect(() => {
+    if (pathname.includes('/profile')) {
+      setValue('profile');
+    } else if (pathname.includes('/new-round')) {
+      setValue('new-round');
+    } else {
+      setValue('home');
+    }
+  }, [pathname]);
+
+  const handleTabChange = (newValue: string) => {
+    setValue(newValue);
+    
+    // Navigate to the appropriate page
+    switch (newValue) {
+      case 'home':
+        console.log('🔵 [NAV] Navigating to Home');
+        router.push('/home');
+        break;
+      case 'new-round':
+        console.log('🔵 [NAV] Navigating to New Round (TODO: implement page)');
+        // TODO: Implement new round creation page
+        break;
+      case 'profile':
+        console.log('🔵 [NAV] Navigating to Profile');
+        router.push('/profile');
+        break;
+      default:
+        router.push('/home');
+    }
+  };
+
   return (
-    <Tabs value={value} onValueChange={setValue}>
+    <Tabs value={value} onValueChange={handleTabChange}>
       <TabItem value="home" icon={<Home />} label="Home" />
-      {/* // TODO: These currently don't link anywhere */}
       <TabItem value="new-round" icon={<CircleSpark />} label="New Round" />
       <TabItem value="profile" icon={<User />} label="Profile" />
     </Tabs>
