@@ -1,5 +1,5 @@
 'use client';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Button } from '@worldcoin/mini-apps-ui-kit-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -45,6 +45,8 @@ function PublicRoundCard({
   roundId, 
   isUserJoined = false
 }: Props) {
+  // Component initialization debug
+  console.log('🟢 [FRONTEND] PublicRoundCard component initialized:', { name, roundId, isUserJoined });
   const [isJoining, setIsJoining] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -57,48 +59,73 @@ function PublicRoundCard({
   // Calculate real progress based on current members vs total
   const realProgress = progress !== undefined ? progress : members / totalMembers;
 
+  // Debug: Track modal state changes to detect potential loops
+  useEffect(() => {
+    console.log('🔵 [FRONTEND] Modal state changed - showSuccessModal:', showSuccessModal);
+  }, [showSuccessModal]);
+
   const handleJoinRound = async () => {
+    console.log('� [FRONTEND] HANDLE JOIN ROUND FUNCTION CALLED!');
+    console.log('�🔵 [FRONTEND] Join Round button clicked for:', { roundId, name });
+    console.log('🔵 [FRONTEND] User session:', session?.user?.id || 'No session');
+    
     if (!roundId) {
+      console.log('❌ [FRONTEND] Round ID validation failed - no roundId provided');
       setErrorMessage('Round ID not available');
       setShowErrorModal(true);
       return;
     }
 
     if (!session?.user) {
+      console.log('❌ [FRONTEND] Session validation failed - user not authenticated');
       setErrorMessage('User not authenticated. Please login again.');
       setShowErrorModal(true);
       return;
     }
+    console.log('✅ [FRONTEND] Validation complete - proceeding with API call');
 
     try {
       setIsJoining(true);
-      console.log('🔄 Joining round:', roundId, 'for user:', session.user.id);
+      console.log('🔄 [FRONTEND] Setting isJoining=true, button should show loading state');
+      console.log('🔄 [FRONTEND] Making API call to join round:', roundId, 'for user:', session.user.id);
       
       // API call to join round
+      const requestBody = { roundId };
+      console.log('🔵 [FRONTEND] Request body:', requestBody);
+      
       const response = await fetch('/api/join-round', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ roundId }),
+        body: JSON.stringify(requestBody),
       });
+      
+      console.log('🔵 [FRONTEND] Response status:', response.status, response.statusText);
 
       if (!response.ok) {
-        throw new Error('Failed to join round');
+        console.log('❌ [FRONTEND] API response not OK:', response.status);
+        throw new Error(`Failed to join round: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('✅ API response:', result);
+      console.log('✅ [FRONTEND] API response successful:', result);
       
-      console.log('✅ Successfully joined round');
+      console.log('✅ [FRONTEND] Successfully joined round - updating state');
+      console.log('🔵 [FRONTEND] Setting hasJoined=true');
       setHasJoined(true);
+      console.log('🔵 [FRONTEND] Setting showSuccessModal=true');
+      console.log('🔵 [FRONTEND] Current showSuccessModal state before setting:', showSuccessModal);
       setShowSuccessModal(true);
       
     } catch (error) {
-      console.error('❌ Error joining round:', error);
+      console.error('❌ [FRONTEND] Error joining round:', error);
+      console.error('❌ [FRONTEND] Error details:', error instanceof Error ? error.message : error);
       setErrorMessage('Failed to join the round. Please try again.');
+      console.log('🔵 [FRONTEND] Setting showErrorModal=true');
       setShowErrorModal(true);
     } finally {
+      console.log('🔵 [FRONTEND] Setting isJoining=false, button should return to normal state');
       setIsJoining(false);
     }
   };
@@ -171,6 +198,7 @@ function PublicRoundCard({
             variant="primary"
             disabled={isJoining}
             onClick={(e: React.MouseEvent) => {
+              console.log('🔴 [FRONTEND] BUTTON CLICKED! Event triggered');
               e.stopPropagation(); // Prevent card click
               handleJoinRound();
             }}
@@ -206,7 +234,16 @@ function PublicRoundCard({
                 variant="primary"
                 size="sm"
                 onClick={() => {
-                  setShowSuccessModal(false);
+                  console.log('🔵 [FRONTEND] Success modal OK button clicked');
+                  console.log('🔵 [FRONTEND] Current showSuccessModal state:', showSuccessModal);
+                  
+                  // Prevent multiple rapid clicks
+                  if (showSuccessModal) {
+                    setShowSuccessModal(false);
+                    console.log('🔵 [FRONTEND] Set showSuccessModal to false');
+                  } else {
+                    console.log('⚠️ [FRONTEND] Modal already closed, preventing duplicate action');
+                  }
                 }}
                 className="w-full"
               >

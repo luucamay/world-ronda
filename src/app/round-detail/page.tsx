@@ -1,3 +1,5 @@
+'use client';
+
 import { Page } from '@/components/PageLayout';
 import { TopBar } from '@worldcoin/mini-apps-ui-kit-react';
 import { Suspense } from 'react';
