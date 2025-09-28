@@ -47,6 +47,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signedNonce: string;
         finalPayloadJson: string;
       }) => {
+        const authorizeStart = performance.now();
+        console.log('⏱️ NextAuth: Starting authorization...');
+        
+        console.log('⏱️ NextAuth: Step 1 - Verifying nonce...');
         const expectedSignedNonce = hashNonce({ nonce });
 
         if (signedNonce !== expectedSignedNonce) {
@@ -54,16 +58,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        console.log('⏱️ NextAuth: Step 2 - Verifying SIWE message...');
+        const siweStart = performance.now();
         const finalPayload: MiniAppWalletAuthSuccessPayload =
           JSON.parse(finalPayloadJson);
         const result = await verifySiweMessage(finalPayload, nonce);
+        console.log(`⏱️ NextAuth: Step 2 completed in ${(performance.now() - siweStart).toFixed(2)}ms`);
 
         if (!result.isValid || !result.siweMessageData.address) {
           console.log('Invalid final payload');
           return null;
         }
         // Optionally, fetch the user info from your own database
+        console.log('⏱️ NextAuth: Step 3 - Fetching user info...');
+        const userInfoStart = performance.now();
         const userInfo = await MiniKit.getUserInfo(finalPayload.address);
+        console.log(`⏱️ NextAuth: Step 3 completed in ${(performance.now() - userInfoStart).toFixed(2)}ms`);
+        console.log(`⏱️ NextAuth: Total authorization time: ${(performance.now() - authorizeStart).toFixed(2)}ms`);
 
         return {
           id: finalPayload.address,

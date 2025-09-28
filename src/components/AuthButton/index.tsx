@@ -17,9 +17,15 @@ export const AuthButton = () => {
     if (!isInstalled || isPending) {
       return;
     }
+    
+    const buttonClickStart = performance.now();
+    console.log('🚀 AuthButton: User clicked login button');
     setIsPending(true);
+    
     try {
+      console.log('🚀 AuthButton: Starting wallet authentication...');
       await walletAuth();
+      console.log(`🚀 AuthButton: Login process completed in ${(performance.now() - buttonClickStart).toFixed(2)}ms`);
     } catch (error) {
       console.error('Wallet authentication button error', error);
       setIsPending(false);
