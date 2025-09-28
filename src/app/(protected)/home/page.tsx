@@ -71,11 +71,6 @@ export default async function Home() {
             isUserJoined={true}
           />
         </div>
-        
-        <Verify />
-        <Pay />
-        <Transaction />
-        <ViewPermissions />
       </Page.Main>
     </>
   );
